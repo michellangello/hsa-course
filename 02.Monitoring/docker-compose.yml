@@ -1,0 +1,145 @@
+services:
+  telegraf:
+    image: telegraf:1.33.0-alpine
+    platform: linux/amd64
+    user: root:1000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./telegraf/etc/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb
+      - mongo
+      - elasticsearch
+    links:
+      - influxdb
+    ports:
+      - '127.0.0.1:8125:8125/udp'
+    networks:
+      - backend
+
+  influxdb:
+    image: influxdb:1.11.8-alpine
+    platform: linux/amd64
+    env_file: .env
+    ports:
+      - '127.0.0.1:8086:8086'
+    volumes:
+      - ./:/imports
+      - influxdb_data:/var/lib/influxdb
+    networks:
+      - backend
+
+  grafana:
+    image: grafana/grafana:11.3.2
+    depends_on:
+      - influxdb
+    env_file: .env
+    links:
+      - influxdb
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/
+    networks:
+      - backend
+
+  nginx:
+    image: nginx:1.26.2-alpine3.20-perl
+    depends_on:
+      - grafana
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8000:80"
+    networks:
+      - backend
+
+  mongo:
+    image: mongo:8.0
+    ports:
+      - "${MONGODB_PORT}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    restart: always
+    networks:
+      - backend
+
+  mongo-express:
+    image: mongo-express:1.0.2-20-alpine3.19
+    restart: always
+    user: root:1000
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+      - ME_CONFIG_BASICAUTH_USERNAME=${MONGOEXPRESS_LOGIN}
+      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGOEXPRESS_PASSWORD}
+      - ME_CONFIG_MONGODB_URL=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/?authSource=admin
+    volumes:
+      - mongo_data:/data/db
+    ports:
+      - "9081:8081"
+    depends_on:
+      - mongo
+    networks:
+      - backend
+
+  elasticsearch:
+    restart: always
+    image: elasticsearch:${ELK_VERSION}
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      - cluster.name=laradock-cluster
+      - node.name=laradock-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - indices.id_field_data.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.initial_master_nodes=laradock-node
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "${ELASTICSEARCH_HOST_HTTP_PORT}:9200"
+      - "${ELASTICSEARCH_HOST_TRANSPORT_PORT}:9300"
+    networks:
+      - backend
+
+  app:
+    image: service-demo
+    build:
+      context: ./service-demo
+      dockerfile: Dockerfile
+    ports:
+      - "9090:8080"
+    environment:
+      - ConnectionStrings__MongoDb=mongodb://root:example@mongo:27017
+      - ConnectionStrings__Elasticsearch=http://elasticsearch:9200
+    networks:
+      - backend
+    depends_on:
+      - mongo
+      - elasticsearch
+
+volumes:
+  grafana_data: {}
+  influxdb_data: {}
+  mongo_data: {}
+  mongo_config: {}
+  elasticsearch: {}
+
+networks:
+  backend:
+    driver: bridge
