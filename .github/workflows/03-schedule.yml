@@ -1,8 +1,8 @@
-name: Run Docker Worker Every Hour
+name: Run 03.Monitoring User Metrics Worker Every Hour
 
 on:
   schedule:
-    - cron: "*/10 * * * *" 
+    - cron: "0 * * * *" 
 
 jobs:
   run-docker-worker:
@@ -13,4 +13,4 @@ jobs:
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
 
       - name: Run Docker Container
-        run: docker run ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
+        run: docker run -e GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }} GA_API_SECRET=${{ secrets.GA_API_SECRET }}  ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
