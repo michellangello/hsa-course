@@ -1,0 +1,47 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "03-monitoring-user-metrics" ]
+  pull_request:
+    branches: [ "03-monitoring-user-metrics" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Log in to DockerHub
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag 03.monitoring-user-metrics:$(date +%s)
+
+    - name: Tag the Docker image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker tag 03.monitoring-user-metrics:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:$IMAGE_TAG
+
+    - name: Push the Docker image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker push ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:$IMAGE_TAG
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag 03.monitoring-user-metrics:$(date +%s)
+
+    - name: Tag the Docker image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker tag 03.monitoring-user-metrics:$IMAGE_TAG ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:$IMAGE_TAG
+
+    - name: Push the Docker image
+      run: |
+        IMAGE_TAG=$(date +%s)
+        docker push ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:$IMAGE_TAG
