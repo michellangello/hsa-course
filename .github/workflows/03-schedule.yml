@@ -13,6 +13,4 @@ jobs:
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
 
       - name: Run Docker Container
-        run: docker run -e GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }} \
-          -e GA_API_SECRET=${{ secrets.GA_API_SECRET }}
-          ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
+        run: docker run -e GA_MEASUREMENT_ID=${{ secrets.GA_MEASUREMENT_ID }} -e GA_API_SECRET=${{ secrets.GA_API_SECRET }} ${{ secrets.DOCKER_USERNAME }}/03.monitoring-user-metrics:latest
