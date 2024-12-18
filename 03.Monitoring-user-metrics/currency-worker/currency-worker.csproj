@@ -4,7 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>dotnet-currentcy_worker-6a92a7eb-b010-4d09-9a72-03cff5e51f58</UserSecretsId>
+        <UserSecretsId>dotnet-currency_worker-6a92a7eb-b010-4d09-9a72-03cff5e51f58</UserSecretsId>
         <RootNamespace>currency_worker</RootNamespace>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>

@@ -25,11 +25,9 @@ public class Ga4EventSender(ILogger<Ga4EventSender> logger)
 				new
 				{
 					name = "exchange_rate",
-					@params = new
-					{
-						currency = "UAH/USD",
-						rate = uahToUsdRate
-					}
+					action = "update",
+					label="uah/usd",
+					value=uahToUsdRate
 				}
 			}
 		};
