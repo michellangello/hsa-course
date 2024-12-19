@@ -1,7 +1,7 @@
 using System.Text;
 using Newtonsoft.Json;
 
-namespace currency_worker.Analytics;
+namespace currency_worker;
 
 public class Ga4EventSender(ILogger<Ga4EventSender> logger)
 {

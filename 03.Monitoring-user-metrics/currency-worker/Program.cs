@@ -1,5 +1,4 @@
-using currency_worker.Analytics;
-using currency_worker.Quartz;
+using currency_worker;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddSingleton<Ga4EventSender>();

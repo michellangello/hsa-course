@@ -1,9 +1,7 @@
 ﻿using System.Net.Http.Json;
-using currency_worker.Analytics;
-using Quartz;
 using Newtonsoft.Json;
 
-namespace currency_worker.Quartz;
+namespace currency_worker;
 
 public class CurrencyJob(Ga4EventSender ga4EventSender, ILogger<CurrencyJob> logger)
 {
