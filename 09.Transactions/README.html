@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>HSA&period; Homework10&period; Transactions&comma; Isolations&comma; Locks</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h2 id="hsa-homework10-transactions-isolations-locks">HSA. Homework10. Transactions, Isolations, Locks</h2>
+<p>The goal of the project is to investigate common isolation problems
+in MySql and PostgreSql on different isolation levels</p>
+<p>Investigated problems:</p>
+<ul>
+<li>Lost update</li>
+<li>Dirty Read</li>
+<li>Non-repeatable Reads</li>
+<li>Phantom Reads</li>
+</ul>
+<h3 id="dirty-read">Dirty Read</h3>
+<p>A dirty read occurs when a transaction retrieves
+a row that has been updated by another transaction that is not yet committed.</p>
+<table>
+<tr>
+<th> Transaction 1 </th>
+<th> Transaction 2 </th>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">select</span> age
+<span class="hljs-keyword">from</span> users
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+<span class="hljs-comment">-- retrieves 20</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">UPDATE</span> users
+<span class="hljs-keyword">SET</span> age <span class="hljs-operator">=</span> <span class="hljs-number">21</span>
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> age
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+<span class="hljs-comment">-- retrieves 21 in Read Uncommitted </span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h3 id="non-repeatable-reads">Non-repeatable Reads</h3>
+<p>A non-repeatable read occurs when a transaction retrieves a row twice and that
+row is updated by another transaction that is committed in between.</p>
+<table>
+<tr>
+<th> Transaction 1 </th>
+<th> Transaction 2 </th>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">SELECT</span> age
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+<span class="hljs-comment">-- retrieves 25</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">UPDATE</span> users
+<span class="hljs-keyword">SET</span> age <span class="hljs-operator">=</span> <span class="hljs-number">42</span>
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+<span class="hljs-keyword">COMMIT</span>;
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> age
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Alice&quot;;
+<span class="hljs-comment">-- retrieves 42 in Read Uncommitted</span>
+<span class="hljs-comment">-- and Read Committed</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h3 id="phantom-reads">Phantom Reads</h3>
+<p>A phantom read occurs when a transaction retrieves a set of rows twice and new rows are inserted into or removed from
+that set by another transaction that is committed in between.</p>
+<h4 id="scenario-1">Scenario 1</h4>
+<table>
+<tr>
+<th> Transaction 1 </th>
+<th> Transaction 2 </th>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">SELECT</span> name
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> age <span class="hljs-operator">&gt;</span> <span class="hljs-number">18</span>;
+<span class="hljs-comment">-- retrieves Alice and Bob</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> users(name, age)
+<span class="hljs-keyword">VALUES</span> (&quot;Carl&quot;, <span class="hljs-number">27</span>);
+<span class="hljs-keyword">COMMIT</span>;
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">SELECT</span> name
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> age <span class="hljs-operator">&gt;</span> <span class="hljs-number">18</span>;
+<span class="hljs-comment">-- retrieves Alice, Bob and Carl</span>
+<span class="hljs-comment">-- when Phantom Reads yes </span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h4 id="scenario-2">Scenario 2</h4>
+<table>
+<tr>
+<th> Transaction 1 </th>
+<th> Transaction 2 </th>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">SELECT</span> name
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> age <span class="hljs-operator">&gt;</span> <span class="hljs-number">18</span>;
+<span class="hljs-comment">-- retrieves Alice and Bob</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td></td>
+<td>
+<pre><code class="language-sql"><span class="hljs-keyword">START</span> TRANSACTION;
+<span class="hljs-keyword">INSERT</span> <span class="hljs-keyword">INTO</span> users(name, age)
+<span class="hljs-keyword">VALUES</span> (&quot;Carl&quot;, <span class="hljs-number">27</span>);
+<span class="hljs-keyword">COMMIT</span>;
+</code></pre>
+</td>
+</tr>
+<tr>
+<td>
+<pre><code class="language-sql">
+<span class="hljs-keyword">UPDATE</span> users
+<span class="hljs-keyword">SET</span> age <span class="hljs-operator">=</span> <span class="hljs-number">42</span>
+<span class="hljs-keyword">WHERE</span> name <span class="hljs-operator">=</span> &quot;Carl&quot;;
+
+<span class="hljs-keyword">SELECT</span> name
+<span class="hljs-keyword">FROM</span> users
+<span class="hljs-keyword">WHERE</span> age <span class="hljs-operator">&gt;</span> <span class="hljs-number">18</span>;
+<span class="hljs-comment">-- retrieves Alice, Bob and Carl</span>
+<span class="hljs-comment">-- when Phantom Reads yes</span>
+</code></pre>
+</td>
+<td>
+</td>
+</tr>
+</table>
+<h3 id="mysql">MySQL</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Dirty Read</th>
+<th>Non-repeatable Reads</th>
+<th>Phantom Reads Scenario 1</th>
+<th>Phantom Reads Scenario 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted</td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+</tr>
+<tr>
+<td>Read Committed</td>
+<td><span>no</span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td><span>no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span><strong>yes</strong></span></td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td><span>no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+</tr>
+</tbody>
+</table>
+<h3 id="postgresql">PostgreSQL</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Dirty Read</th>
+<th>Non-repeatable Reads</th>
+<th>Phantom Reads Scenario 1</th>
+<th>Phantom Reads Scenario 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Committed</td>
+<td><span >no</span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+<td><span><strong>yes</strong></span></td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+<td><span >no</span></td>
+</tr>
+</tbody>
+</table>
+<h3 id="conclusion">Conclusion</h3>
+<p>PostgreSql handles <strong>Phantom Reads</strong> on <strong>Repeatable Read</strong> better than Mysql.</p>
+
+            
+            
+        </body>
+        </html>
