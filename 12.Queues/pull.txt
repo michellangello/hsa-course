@@ -1,0 +1,2 @@
+http://localhost:5223/redis-rdb/pull
+http://localhost:5223/redis-aof/pull

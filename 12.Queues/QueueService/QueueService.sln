@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueueService", "QueueService\QueueService.csproj", "{8392A76E-D289-4700-A1C5-14DBBCFBFCBC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8392A76E-D289-4700-A1C5-14DBBCFBFCBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8392A76E-D289-4700-A1C5-14DBBCFBFCBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8392A76E-D289-4700-A1C5-14DBBCFBFCBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8392A76E-D289-4700-A1C5-14DBBCFBFCBC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
