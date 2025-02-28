@@ -1,0 +1,32 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/mysql/mysql.log
+    # If you want to read existing logs from the start:
+    # start_position: beginning
+
+    # Multiline config: each slow query starts with "# Time: "
+    multiline:
+      pattern: '^# Time: '
+      negate: true
+      match: after
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+# Send logs to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+
+# (Optional) If you have Kibana in your stack and want to set up Filebeat dashboards:
+setup.kibana:
+  host: "kibana:5601"
+
+# (Optional) Drop certain lines if you don’t need them
+processors:
+  - drop_event:
+      when:
+        regexp:
+          message: "^/usr/sbin/mysqld"

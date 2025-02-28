@@ -1,0 +1,156 @@
+version: "3.8"
+
+services:
+  # ------------------------------------------------------
+  # MySQL (завжди запускається, без профілю)
+  # ------------------------------------------------------
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    command: >
+      --slow_query_log=ON
+      --slow_query_log_file=/var/log/mysql/mysql.log
+      --long_query_time=10
+      --log_error=/var/log/mysql/error.log
+      --log_output=FILE
+    # Читаємо змінні з .env:
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - mysql_logs:/var/log/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+  # ======================================================
+  # ===========   ELK PROFILE SERVICES   =================
+  # ======================================================
+  
+  # ------------------------------------------------------
+  # Elasticsearch (для Kibana/Logstash)
+  # ------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  # ------------------------------------------------------
+  # Logstash
+  # ------------------------------------------------------
+  logstash:
+    build:
+      context: ./logstash        # Папка, де лежить Dockerfile.logstash
+      dockerfile: Dockerfile    
+    container_name: logstash
+    user: root 
+    depends_on:
+      - mysql
+      - elasticsearch
+    volumes:
+      - mysql_logs:/var/log/mysql:ro
+      # - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+    # environment:
+    #   - LS_JAVA_OPTS=-Xms512m\ -Xmx512m
+    ports:
+      - "5044:5044"
+      - "5000:5000"
+
+  # ------------------------------------------------------
+  # Kibana
+  # ------------------------------------------------------
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.9
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=${KIBANA_ES_HOST}  # приклад: http://elasticsearch:9200
+
+  # ======================================================
+  # ===========   GRAYLOG PROFILE SERVICES   =============
+  # ======================================================
+
+  # ------------------------------------------------------
+  # Mongo (для Graylog) - теж можна виділити в профіль graylog
+  # або лишити завжди (залежить від потреб)
+  # ------------------------------------------------------
+  mongo:
+    image: mongo:4.4
+    container_name: mongo_graylog
+    volumes:
+      - mongo_data:/data/db
+
+  # ------------------------------------------------------
+  # Graylog
+  # ------------------------------------------------------
+  graylog:
+    image: graylog/graylog:4.3
+    container_name: graylog
+    depends_on:
+      - mongo
+      - elasticsearch
+    environment:
+      - GRAYLOG_PASSWORD_SECRET=${GRAYLOG_PASSWORD_SECRET}
+      - GRAYLOG_ROOT_PASSWORD_SHA2=${GRAYLOG_ROOT_PASSWORD_SHA2}
+      - GRAYLOG_HTTP_EXTERNAL_URI=http://localhost:9000/
+      - GRAYLOG_ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "9000:9000"
+      - "12201:12201/udp"
+    volumes:
+      - graylog_data:/usr/share/graylog/data
+
+  # ------------------------------------------------------
+  # Filebeat: ви можете використати один чи два профілі
+  # ------------------------------------------------------
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.9
+    container_name: filebeat_mysql
+    # Можна вказати профіль (elk чи graylog), або обидва
+    depends_on:
+      - mysql
+    volumes:
+      - mysql_logs:/var/log/mysql:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - filebeat_data:/usr/share/filebeat/data
+    user: root
+
+  # ------------------------------------------------------
+  # Ваш .NET додаток - завжди
+  # ------------------------------------------------------
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: dotnet_app
+    depends_on:
+      - mysql
+    ports:
+      - "5001:8080"
+    environment:
+      - ConnectionStrings__DefaultConnection=server=mysql;port=3306;user=root;password=${MYSQL_ROOT_PASSWORD};database=${MYSQL_DATABASE};
+
+
+volumes:
+  mysql_data:
+  mysql_logs:
+  es_data:
+  es_graylog_data:
+  mongo_data:
+  graylog_data:
+  filebeat_data:
