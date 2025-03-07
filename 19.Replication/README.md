@@ -8,6 +8,14 @@ Docker MySQL master-slave replication
 - Try to turn off mysql-s1 (stop slave), 
 - Try to remove a column in  database on slave node (try to delete last column and column from the middle)
 
+## Structure
+ - `docker-compose.yml` file sets up a MySQL master-slave replication architecture using three MySQL containers:
+	1.	mysql_m (Master)
+	2.	mysql_s1 (Slave 1)
+	3.	mysql_s2 (Slave 2) 
+ - `read_from_slave.sh` continuously retrieves and displays the last inserted row from a MySQL database table inside a running Docker container. Here’s a breakdown of its functionality:
+ - `write_to_master.sh` continuously inserts random values into a MySQL database table inside a running Docker container.
+
 ## Testing & Results
 
 ### Ensure, that replication is working
