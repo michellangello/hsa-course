@@ -108,6 +108,4 @@ Shortest transaction:          50.00 ms
 -	Availability remains consistently high (≥99.99%) across all tested concurrency levels.
 - 	Average response time significantly increases as concurrency grows:
 - 	From 16.79 ms at 10 users to 318.23 ms at 200 users.
-- 	Throughput stays relatively stable (~0.15 MB/sec), indicating consistent network performance.
-- 	Performance degradation at higher concurrency levels suggests potential improvements such as database indexing, caching, and enhanced scalability.
-
+- 	Throughput stays relatively stable (~0.15 MB/sec)
