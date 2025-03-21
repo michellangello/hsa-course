@@ -1,0 +1,4 @@
+zone "prjctr.com" {
+    type master;
+    file "/etc/bind/zones/db.prjctr.com";
+};

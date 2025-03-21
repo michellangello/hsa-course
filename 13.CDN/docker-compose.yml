@@ -1,0 +1,125 @@
+services:
+  # Client container for testing
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: cdn_client
+    networks:
+      cdn_network:
+        ipv4_address: 172.20.0.13
+    dns:
+      - 172.20.0.10
+    depends_on:
+      - bind
+      - lb1
+      - lb2
+      - node1
+      - node2
+      - node3
+      - node4
+    restart: unless-stopped
+
+  # BIND DNS Server
+  bind:
+    image: sameersbn/bind:9.11.3-20190706
+    container_name: bind_dns
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+      - "10000:10000"
+    volumes:
+      - ./cdn-data:/data
+    networks:
+      cdn_network:
+        ipv4_address: 172.20.0.10
+    restart: unless-stopped
+
+  # Load Balancer 1
+  lb1:
+    image: nginx:alpine
+    container_name: load_balancer_1
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx/load_balancer/lb1.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - node1
+      - node2
+    networks:
+      cdn_network:
+        ipv4_address: 172.20.0.11
+
+  # Load Balancer 2
+  lb2:
+    image: nginx:alpine
+    container_name: load_balancer_2
+    ports:
+      - "8082:80"
+    volumes:
+      - ./nginx/load_balancer/lb2.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - node3
+      - node4
+    networks:
+      cdn_network:
+        ipv4_address: 172.20.0.12
+
+  # Image Node 1
+  node1:
+    image: nginx:alpine
+    container_name: node_1
+    ports:
+      - "9001:80"
+    volumes:
+      - ./images:/usr/share/nginx/html/images
+      - ./nginx/nodes/node.conf:/etc/nginx/nginx.conf
+    networks:
+      - cdn_network
+    restart: unless-stopped
+
+  # Image Node 2
+  node2:
+    image: nginx:alpine
+    container_name: node_2
+    ports:
+      - "9002:80"
+    volumes:
+      - ./images:/usr/share/nginx/html/images
+      - ./nginx/nodes/node.conf:/etc/nginx/nginx.conf
+    networks:
+      - cdn_network
+    restart: unless-stopped
+
+  # Image Node 3
+  node3:
+    image: nginx:alpine
+    container_name: node_3
+    ports:
+      - "9003:80"
+    volumes:
+      - ./images:/usr/share/nginx/html/images
+      - ./nginx/nodes/node.conf:/etc/nginx/nginx.conf
+    networks:
+      - cdn_network
+    restart: unless-stopped
+
+  # Image Node 4
+  node4:
+    image: nginx:alpine
+    container_name: node_4
+    ports:
+      - "9004:80"
+    volumes:
+      - ./images:/usr/share/nginx/html/images
+      - ./nginx/nodes/node.conf:/etc/nginx/nginx.conf
+    networks:
+      - cdn_network
+    restart: unless-stopped
+
+networks:
+  cdn_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
