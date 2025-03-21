@@ -29,7 +29,7 @@ services:
       - "53:53/tcp"
       - "10000:10000"
     volumes:
-      - ./cdn-data:/data
+      - ./dns-data:/data
     networks:
       cdn_network:
         ipv4_address: 172.20.0.10
