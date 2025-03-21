@@ -68,7 +68,7 @@ Example command:
 docker exec -it cdn_client siege -b -c200 -t15S http://cdn.prjctr.com/images/yosemite.jpg
 ```
 
-#### ✅ Caching ON
+#### Caching ON
 
 ```
 Transactions:            30795
@@ -85,7 +85,7 @@ Longest transaction:        0.86 secs
 Shortest transaction:       0.00 secs
 ```
 
-#### 🔄 Round-robin (NO caching)
+#### Round-robin (NO caching)
 
 ```
 Transactions:            11398
@@ -102,7 +102,7 @@ Longest transaction:        1.09 secs
 Shortest transaction:       0.03 secs
 ```
 
-#### 🔁 ip_hash (NO caching)
+#### ip_hash (NO caching)
 
 ```
 Transactions:            10259
@@ -119,7 +119,7 @@ Longest transaction:        1.53 secs
 Shortest transaction:       0.03 secs
 ```
 
-#### 📉 least_conn (NO caching)
+#### least_conn (NO caching)
 
 ```
 Transactions:            12567
