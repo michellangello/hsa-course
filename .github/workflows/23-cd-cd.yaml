@@ -13,16 +13,16 @@ jobs:
     services:
       elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:8.10.1
-        environment:
-          - discovery.type=single-node
         ports:
-          - "9200:9200"
-          - "9300:9300"
-        ulimits:
-          memlock:
-            soft: -1
-            hard: -1
-        mem_limit: 1g
+          - 9200:9200
+        options: >-
+          --health-cmd="curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval=5s
+          --health-timeout=10s
+          --health-retries=12
+        env:
+          discovery.type: single-node
+          ES_JAVA_OPTS: "-Xms256m -Xmx256m"
 
     steps:
     - name: Checkout code
@@ -33,16 +33,9 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Wait for Elasticsearch to be ready
+    - name: Verify Elasticsearch Health
       run: |
-        for i in {1..60}; do
-          curl -s http://localhost:9200/_cluster/health | grep '"status":"green"' && break
-          echo "Waiting for Elasticsearch to be ready..."
-          sleep 5
-        done
-
-    - name: Check Elasticsearch logs
-      run: docker logs $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.10.1)
+        curl -X GET "http://localhost:9200/_cluster/health?pretty"
 
     - name: Install dependencies
       working-directory: 10.NoSql-Elasticsearch
