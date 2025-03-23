@@ -28,6 +28,14 @@ jobs:
       with:
         python-version: '3.9'
 
+    - name: Wait for Elasticsearch to be ready
+      run: |
+        for i in {1..30}; do
+          curl -s http://localhost:9200/_cluster/health | grep '"status":"green"' && break
+          echo "Waiting for Elasticsearch to be ready..."
+          sleep 2
+        done
+
     - name: Install dependencies
       working-directory: 10.NoSql-Elasticsearch
       run: |
