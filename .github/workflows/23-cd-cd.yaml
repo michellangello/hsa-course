@@ -1,9 +1,9 @@
-name: CI/CD for 10.NoSql-Elasticsearch
+name: Run Tests for 10.NoSql-Elasticsearch
 
 on:
   push:
     branches:
-      - hw23
+      - main
   pull_request:
 
 jobs:
@@ -30,11 +30,14 @@ jobs:
 
     - name: Wait for Elasticsearch to be ready
       run: |
-        for i in {1..30}; do
+        for i in {1..60}; do
           curl -s http://localhost:9200/_cluster/health | grep '"status":"green"' && break
           echo "Waiting for Elasticsearch to be ready..."
-          sleep 2
+          sleep 5
         done
+
+    - name: Check Elasticsearch logs
+      run: docker logs $(docker ps -q --filter ancestor=docker.elastic.co/elasticsearch/elasticsearch:8.10.1)
 
     - name: Install dependencies
       working-directory: 10.NoSql-Elasticsearch
@@ -49,11 +52,3 @@ jobs:
     - name: Run acceptance tests
       working-directory: 10.NoSql-Elasticsearch
       run: pytest
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-    - name: Dummy deploy step
-      run: echo "Deployment successful!"
