@@ -24,9 +24,6 @@ jobs:
           --health-interval=5s
           --health-timeout=10s
           --health-retries=12
-        env:
-          discovery.type: single-node
-          ES_JAVA_OPTS: "-Xms256m -Xmx256m"
 
     steps:
     - name: Checkout code
