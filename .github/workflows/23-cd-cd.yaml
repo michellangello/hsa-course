@@ -3,7 +3,7 @@ name: Run Tests for 10.NoSql-Elasticsearch
 on:
   push:
     branches:
-      - main
+      - hw23
   pull_request:
 
 jobs:
