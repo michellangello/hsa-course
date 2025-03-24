@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: benchmark_db
+      MYSQL_USER: benchmark
+      MYSQL_PASSWORD: benchmark
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/my.cnf
+
+volumes:
+  mysql_data:
