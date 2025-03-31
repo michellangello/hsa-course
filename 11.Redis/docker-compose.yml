@@ -1,0 +1,97 @@
+networks:
+  redis-net:
+
+services:
+  redis-master:
+    image: redis:7
+    container_name: redis-master
+    hostname: redis-master
+    networks:
+      - redis-net
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./config/redis-master:/usr/local/etc/redis
+      - ./data/redis-master:/data 
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  redis-replica-1:
+    image: redis:7
+    container_name: redis-replica-1
+    hostname: redis-replica-1
+    depends_on:
+      - redis-master
+    networks:
+      - redis-net
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./config/redis-replica-1:/usr/local/etc/redis
+      - ./data/redis-replica-1:/data 
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  redis-replica-2:
+    image: redis:7
+    container_name: redis-replica-2
+    hostname: redis-replica-2
+    depends_on:
+      - redis-master
+    networks:
+      - redis-net
+    ports:
+      - "6381:6379"
+    volumes:
+      - ./config/redis-replica-2:/usr/local/etc/redis
+      - ./data/redis-replica-2:/data 
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  sentinel-1:
+    image: redis:7
+    container_name: sentinel-1
+    hostname: sentinel-1
+    depends_on:
+      - redis-master
+      - redis-replica-1
+      - redis-replica-2
+    ports:
+      - "26379:26379"
+    volumes:
+      - ./config/sentinel-1:/usr/local/etc/redis
+      - ./data/sentinel-1:/data
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf --sentinel
+    networks:
+      - redis-net
+
+  sentinel-2:
+    image: redis:7
+    container_name: sentinel-2
+    hostname: sentinel-2
+    depends_on:
+      - redis-master
+      - redis-replica-1
+      - redis-replica-2
+    ports:
+      - "26380:26379"
+    volumes:
+      - ./config/sentinel-2:/usr/local/etc/redis
+      - ./data/sentinel-2:/data
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf --sentinel
+    networks:
+      - redis-net
+
+  sentinel-3:
+    image: redis:7
+    container_name: sentinel-3
+    hostname: sentinel-3
+    depends_on:
+      - redis-master
+      - redis-replica-1
+      - redis-replica-2
+    ports:
+      - "26381:26379"
+    volumes:
+      - ./config/sentinel-3:/usr/local/etc/redis
+      - ./data/sentinel-3:/data
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf --sentinel
+    networks:
+      - redis-net

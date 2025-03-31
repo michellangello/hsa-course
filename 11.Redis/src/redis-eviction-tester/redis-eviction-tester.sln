@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "redis-eviction-tester", "redis-eviction-tester.csproj", "{06F7E7AB-43AE-468F-A1AF-8FB6FF07DAED}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "probabilistic-example", "..\probabilistic-example\probabilistic-example.csproj", "{93FF8F5B-F43E-4EAE-A332-96DBA1714F2E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{06F7E7AB-43AE-468F-A1AF-8FB6FF07DAED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06F7E7AB-43AE-468F-A1AF-8FB6FF07DAED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06F7E7AB-43AE-468F-A1AF-8FB6FF07DAED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06F7E7AB-43AE-468F-A1AF-8FB6FF07DAED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93FF8F5B-F43E-4EAE-A332-96DBA1714F2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93FF8F5B-F43E-4EAE-A332-96DBA1714F2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93FF8F5B-F43E-4EAE-A332-96DBA1714F2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93FF8F5B-F43E-4EAE-A332-96DBA1714F2E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
